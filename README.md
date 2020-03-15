@@ -1,3 +1,3 @@
-# Your project name here
+# PromiseWrapper
 
-Your project description here
+A helper utility for creating and returning promises.
