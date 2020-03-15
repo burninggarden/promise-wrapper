@@ -1,31 +1,37 @@
-import Tap            from 'tap';
 import PromiseWrapper from 'promise-wrapper';
 
-Tap.test('.getPromise() returns the same promise when called multiple times', test => {
-	const promiseWrapper = new PromiseWrapper<string>();
+describe('PromiseWrapper', () => {
+	it('.getPromise() returns the same promise when called multiple times', () => {
+		const promiseWrapper = new PromiseWrapper<string>();
+		const firstPromise = promiseWrapper.getPromise();
+		const secondPromise = promiseWrapper.getPromise();
 
-	test.equals(promiseWrapper.getPromise(), promiseWrapper.getPromise());
-	test.end();
-});
-
-Tap.test('.resolve() fulfills inner promise', test => {
-	const promiseWrapper = new PromiseWrapper<string>();
-
-	promiseWrapper.getPromise().then(result => {
-		test.equal(result, 'gandalf');
-		test.end();
+		expect(firstPromise).toStrictEqual(secondPromise);
 	});
 
-	promiseWrapper.resolve('gandalf');
-});
+	it('.resolve() fulfills inner promise', async () => {
+		const promiseWrapper = new PromiseWrapper<string>();
 
-Tap.test('.reject() rejects inner promise', test => {
-	const promiseWrapper = new PromiseWrapper<string>();
+		promiseWrapper.getPromise().then(result => {
+			expect(result).toStrictEqual('gandalf');
+		});
 
-	promiseWrapper.getPromise().catch(error => {
-		test.equal(error.message, 'some error');
-		test.end();
+		promiseWrapper.resolve('gandalf');
+
+		await promiseWrapper.getPromise();
 	});
 
-	promiseWrapper.reject(new Error('some error'));
+	it('.reject() rejects inner promise', async () => {
+		const promiseWrapper = new PromiseWrapper<string>();
+		const testWrapper = new PromiseWrapper<any>();
+
+		promiseWrapper.getPromise().catch(error => {
+			expect(error.message).toStrictEqual('some error');
+			testWrapper.resolve();
+		});
+
+		promiseWrapper.reject(new Error('some error'));
+
+		await testWrapper.getPromise();
+	});
 });
